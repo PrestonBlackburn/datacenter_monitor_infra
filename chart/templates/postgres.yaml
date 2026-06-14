@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Release.Name }}-sensor-postgres
+    labels:
+        app: database
+        release: {{ .Release.Name }}
+        component: postgres
+
+spec:
+    replicas: {{ .Values.database.replicas | default 1 }}
+    selector:
+        matchLabels:
+            app: database
+    template:
+        metadata:
+            labels:
+                app: database
+                release: {{ .Release.Name }}
+
+        spec:
+            containers:
+            - name: sensor-postgres
+              image: "{{ .Values.database.image | default "sensor-postgres:latest" }}"
+              imagePullPolicy: {{ if eq .Values.global.environment "dev" }}IfNotPresent{{ else }}Always{{ end }}
+              ports:
+              - containerPort: {{ .Values.database.port }}
+              envFrom:
+              - secretRef: 
+                  name: {{ .Release.Name }}-sensor-secrets
+              volumeMounts:
+              - mountPath: /var/lib/postgresql/data-01
+                name: {{ .Release.Name }}-pg-pv
+              resources:
+                limits: 
+                  cpu: "2"
+                  memory: "4Gi"
+                requests: 
+                  cpu: "250m"
+                  memory: "256Mi"
+              env:
+              - name: PGDATA
+                value: /var/lib/postgresql/data-01/pgdata
+
+            volumes:
+            - name: {{ .Release.Name }}-pg-pv # automatically created
+              persistentVolumeClaim: 
+                claimName: {{ .Release.Name }}-pg-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{.Release.Name}}-{{ .Values.database.host }}
+spec:
+    type: ClusterIP
+    selector:
+        app: database
+    ports:
+        - protocol: TCP
+          port: {{ .Values.database.port }}
+          targetPort: {{ .Values.database.port }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-pg-pvc
+  labels:
+    app: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

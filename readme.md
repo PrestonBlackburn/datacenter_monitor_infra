@@ -1,3 +1,3 @@
 # Helm Chart For Audio Monitoring Project
 
-(todo)
+For now this is mainly just for the postgres container

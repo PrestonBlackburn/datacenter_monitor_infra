@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensor-db-lb
+  namespace: sensors
+  annotations:
+    metallb.universe.tf/address-pool: default-addresspool
+spec:
+  type: LoadBalancer
+  selector:
+    app: database
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,12 @@
+PostgreSQL deployed: {{ .Release.Name }}
+
+Connection details:
+  Host: {{ .Release.Name }}-{{ .Values.database.host }}
+  Port: {{ .Values.database.port }}
+  Database: {{ .Values.database.database_name }}
+
+Verify the deployment:
+  kubectl get pods,pvc,svc -l app=database -n {{ .Release.Namespace }}
+
+Connect directly:
+  kubectl exec -it deploy/{{ .Release.Name }}-sensor-postgres -n {{ .Release.Namespace }} -- psql -U $POSTGRES_USER -d {{ .Values.database.database_name }}

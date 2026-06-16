@@ -1,11 +1,12 @@
-postgres:
+global:
+  secret_name: sensor-secrets
+  environment: prod
+
+database:
   host: postgres-svc
   port: 5432
   database_name: sensors
-  # use sealed secrets (todo)
-  setup_username: ...
-  setup_password: ...
-  
+
   # other settings
   replicas: 1
-  image: null # current image for build
+  image: ghcr.io/prestonblackburn/sensor-postgres:bb3b0ed # current image for build

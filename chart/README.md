@@ -29,7 +29,7 @@ None
 
 ## Requirements
 
-None
+- Sealed Secrets
 
 ## Values
  

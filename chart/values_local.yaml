@@ -1,11 +1,11 @@
+global:
+  secret_name: sensor-secrets
+  environment: dev
 
-
-postgres:
+database:
   host: postgres-svc
   port: 5432
   database_name: sensors
-  setup_username: admin
-  setup_password: admin
 
   # other settings
   replicas: 1

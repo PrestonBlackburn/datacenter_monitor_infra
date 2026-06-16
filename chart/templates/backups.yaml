@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-backup
+  labels:
+    release: {{ .Release.Name }}
+    component: backup
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: db-backup
+            image: postgres:18
+            imagePullPolicy: IfNotPresent
+            envFrom:
+            - secretRef:
+                name: {{ .Values.global.secret_name }}
+            env:
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.secret_name }}
+                    key: POSTGRES_PASSWORD
+            command:
+              - /bin/sh
+              - -c
+              - |
+                find /backup -name "*.dump" -mtime +30 -delete
+                pg_dump -h {{ .Release.Name }}-{{ .Values.database.host }} -U $POSTGRES_USER -d $POSTGRES_DB -F c -f /backup/sensors-$(date +%Y%m%d-%H%M%S).dump
+            volumeMounts:
+              - name: backup-storage
+                mountPath: /backup
+            resources:
+              limits: 
+                cpu: "2"
+                memory: "4Gi"
+              requests: 
+                cpu: "100m"
+                memory: "128Mi"
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim: 
+              claimName: {{ .Release.Name }}-backup-pvc
+          restartPolicy: OnFailure
+
+--- 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-backup-pvc
+  labels:
+    app: backup
+spec:
+  storageClassName: nfs-csi-hdd
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi

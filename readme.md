@@ -25,4 +25,19 @@ Test chart
 helm install sensor ./ -f values.yaml --dry-run --debug -n sensors
 ```
 
-deploy chart through argo cd
+deploy chart through argo cd  
+
+
+### Backups
+
+Backups are handled daily with cron.   
+
+Use the `extras/backup_restore.yaml` pod to access the nfs to restore postgres if needed.  
+
+Retore from a backup with the following. Note that you'll want to update the yaml based on your helm values -   
+```bash
+kubectl apply -f extras/backup_restore.yaml -n <your namespace>
+kubectl exec -it pg-restore -n sensors -- /bin/sh
+ls /backup
+pg_restore -h <host> -U <user> -d <database> --clean --if-exists /backup/sensors-20260615-000000.dump
+```

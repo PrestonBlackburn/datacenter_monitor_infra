@@ -10,3 +10,13 @@ database:
   # other settings
   replicas: 1
   image: null # current image for build from github when not local
+
+consumer:
+  replicas: 1
+  image: null
+  topic_filter: "application/+/device/+/event/up"
+  topic_re: "^application/[^/]+/device/([0-9a-fA-F]+)/event/up$"
+  qos: 0
+  mqtt_broker_host: chirpstack-mosquitto-svc
+  mqtt_broker_port: 1883
+  mqtt_broker_namespace: chirp

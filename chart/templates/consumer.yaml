@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Release.Name }}-sensor-consumer
+    labels:
+        app: consumer
+        release: {{ .Release.Name }}
+        component: mqtt-reader
+
+spec:
+    replicas: {{ .Values.consumer.replicas | default 1 }}
+    selector:
+        matchLabels:
+            app: consumer
+    template:
+        metadata:
+            labels:
+                app: consumer
+                release: {{ .Release.Name }}
+        spec:
+            containers:
+            - name: sensor-consumer
+              image: "{{ .Values.consumer.image | default "sensor-consumer:latest" }}"
+              imagePullPolicy: {{ if eq .Values.global.environment "dev" }}IfNotPresent{{ else }}Always{{ end }}
+              envFrom:
+              - secretRef: 
+                  name: {{ .Values.global.secret_name }}
+              env:
+              - name: TOPIC_FILTER
+                value: "{{ .Values.consumer.topic_filter }}"
+              - name: TOPIC_RE
+                value: "{{ .Values.consumer.topic_re }}"
+              - name: QOS
+                value: "{{ .Values.consumer.qos }}"
+              - name: MQTT_BROKER_HOST
+                value: {{ printf "%s.%s.svc.cluster.local" .Values.consumer.mqtt_broker_host .Values.consumer.mqtt_broker_namespace | quote }}
+              - name: MQTT_BROKER_PORT
+                value: {{ .Values.consumer.mqtt_broker_port | quote }}
+              - name: POSTGRES_HOST
+                value: "{{.Release.Name}}-{{ .Values.database.host }}"
+              - name: POSTGRES_PORT
+                value: {{ .Values.database.port | quote }}
+
+              resources:
+                limits: 
+                  cpu: "1"
+                  memory: "2Gi"
+                requests: 
+                  cpu: "200m"
+                  memory: "250Mi"
+              

@@ -9,4 +9,14 @@ database:
 
   # other settings
   replicas: 1
-  image: ghcr.io/prestonblackburn/sensor-postgres:bb3b0ed # current image for build
+  image: ghcr.io/prestonblackburn/sensor-postgres:8b76429 # current image for build
+
+consumer:
+  replicas: 1
+  image: ghcr.io/prestonblackburn/sensor-consumer:latest
+  topic_filter: "application/+/device/+/event/up"
+  topic_re: "^application/[^/]+/device/([0-9a-fA-F]+)/event/up$"
+  qos: 0
+  mqtt_broker_host: chirpstack-mosquitto-svc
+  mqtt_broker_port: 1883
+  mqtt_broker_namespace: chirp

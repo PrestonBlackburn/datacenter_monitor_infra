@@ -41,3 +41,9 @@ kubectl exec -it pg-restore -n sensors -- /bin/sh
 ls /backup
 pg_restore -h <host> -U <user> -d <database> --clean --if-exists /backup/sensors-20260615-000000.dump
 ```
+
+Example Query:
+```sql
+SELECT received_time AT TIME ZONE 'America/Denver', sensor_id, hz_4000_dbfs, hz_1000_dbfs, hz_440_dbfs, hz_110_dbfs
+	FROM app.audio_sensor order by received_time desc;
+```

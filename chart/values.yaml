@@ -20,3 +20,9 @@ consumer:
   mqtt_broker_host: chirpstack-mosquitto-svc
   mqtt_broker_port: 1883
   mqtt_broker_namespace: chirp
+
+dashboard:
+  replicas: 1
+  image: ghcr.io/prestonblackburn/sensor-dashboard:latest
+  host: dashboard-svc
+  port: 8000

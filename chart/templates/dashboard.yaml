@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Release.Name }}-sensor-dashboard
+    labels:
+        app: dashboard
+        release: {{ .Release.Name }}
+        component: dashboard
+
+spec:
+    replicas: {{ .Values.dashboard.replicas | default 1 }}
+    selector:
+        matchLabels:
+            app: dashboard
+    template:
+        metadata:
+            labels:
+                app: dashboard
+                release: {{ .Release.Name }}
+        spec:
+            containers:
+            - name: sensor-dashboard
+              image: "{{ .Values.dashboard.image | default "sensor-dashboard:latest" }}"
+              imagePullPolicy: {{ if eq .Values.global.environment "dev" }}IfNotPresent{{ else }}Always{{ end }}
+              command: ["litestar", "--app=dashboard_app:app", "run", "--host", "0.0.0.0", "--port", "{{ .Values.dashboard.port }}"]
+              ports:
+              - containerPort: {{ .Values.dashboard.port }}
+              envFrom:
+              - secretRef: 
+                  name: {{ .Values.global.secret_name }}
+              env:
+              - name: POSTGRES_HOST
+                value: "{{.Release.Name}}-{{ .Values.database.host }}"
+              - name: POSTGRES_PORT
+                value: {{ .Values.database.port | quote }}
+
+              resources:
+                limits: 
+                  cpu: "1"
+                  memory: "2Gi"
+                requests: 
+                  cpu: "200m"
+                  memory: "250Mi"
+              
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{.Release.Name}}-{{ .Values.dashboard.host }}
+spec:
+    type: ClusterIP
+    selector:
+        app: dashboard
+    ports:
+        - protocol: TCP
+          port: {{ .Values.dashboard.port }}
+          targetPort: {{ .Values.dashboard.port }}

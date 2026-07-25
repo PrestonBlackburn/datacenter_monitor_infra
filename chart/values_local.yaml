@@ -23,6 +23,6 @@ consumer:
 
 dashboard:
   replicas: 1
-  image: ghcr.io/prestonblackburn/sensor-dashboard:latest
-  host: 
-  port: 
+  image: null
+  host: dashboard-svc
+  port: 8000

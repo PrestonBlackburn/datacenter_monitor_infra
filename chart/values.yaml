@@ -9,7 +9,7 @@ database:
 
   # other settings
   replicas: 1
-  image: ghcr.io/prestonblackburn/sensor-postgres:8b76429 # current image for build
+  image: ghcr.io/prestonblackburn/sensor-postgres:3d81e70
 
 consumer:
   replicas: 1

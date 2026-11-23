@@ -18,7 +18,11 @@ kubectl apply -f example-sealed-secret.yaml
 
 # Verify the secret was created
 kubectl get secret my-secret -n default
+
+# update secrets if needed -
+kubeseal --format yaml --merge-into chart/templates/sensor_secrets.yaml --controller-name=sealed-secrets --controller-namespace=sealed-secrets < extras/plain_healthcheck_secrets.yaml
 ```
+
 
 Test chart
 ```bash
